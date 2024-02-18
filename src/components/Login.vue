@@ -1,14 +1,13 @@
 <template>
-  <Navbar />
   <v-sheet max-width="500" class="mx-auto pa-12">
     <v-card elevation="5" class="pa-4">
       <h1 class="d-flex justify-center">Login</h1>
-      <v-form @submit.prevent="LoginSubmit" ref="form">
+      <v-form @submit.prevent="login" ref="form">
         <v-text-field
-          v-model="email"
-          :rules="emailRules"
-          label="Enter Your Email"
-          type="email"
+          v-model="username"
+          :rules="usernameRules"
+          label="Enter Your Username"
+          type="text"
           required
         ></v-text-field>
         <v-text-field
@@ -42,20 +41,14 @@
 </template>
     
   <script>
-import { ref } from "vue";
-
-import Navbar from "./Navbar.vue";
-
 export default {
   name: "Login",
 
-  components: {
-    Navbar,
-  },
+  components: {},
 
   data() {
     return {
-      email: "",
+      username: "",
       password: "",
       passwordRules: [
         (value) => !!value || "Name is required",
@@ -63,9 +56,8 @@ export default {
           (value && value.length >= 8) ||
           "Password must be less than 20 characters",
       ],
-      emailRules: [
-        (value) => !!value || "Email is required",
-        (value) => /.+@.+\..+/.test(value) || "Email must be valid",
+      usernameRules: [
+        (value) => !!value || "username is required",
       ],
       video: null,
       canvas: null,
@@ -94,11 +86,8 @@ export default {
       this.canvas.width = this.video.videoWidth;
       this.canvas.height = this.video.videoHeight;
     },
-
-    LoginSubmit() {
-      if (!this.email || !this.password) {
-        alert("Please Fill form");
-      } else {
+    async login() {
+      try {
         let context = this.canvas.getContext("2d");
 
         context.drawImage(
@@ -120,25 +109,14 @@ export default {
         let tracks = this.video.srcObject.getTracks();
         tracks.forEach((track) => track.stop());
 
-        fetch("https://dummyjson.com/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: this.email,
-            password: this.password,
-            image: this.imageData, // Include image data in the request
-          }),
-        })
-          .then((res) => {
-          localStorage.setItem("email", res.data.email);
-          localStorage.setItem("token", res.data.token);
+        await this.$store.dispatch("login", {
+          username: this.username,
+          password: this.password,
+        });
 
-            alert("Form Submited");
-            this.$router.push({ name: "dashboard" });
-          })
-          .catch(() => {
-            alert("Error in getting Form Data :)");
-          });
+        this.$router.push({ name: "dashboard" });
+      } catch (error) {
+        alert("Login failed: " + error.message);
       }
     },
   },
