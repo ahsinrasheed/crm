@@ -31,6 +31,13 @@
             value="company"
           ></v-list-item>
         </router-link>
+        <router-link to="/department" class="text-white">
+          <v-list-item
+            prepend-icon="mdi-domain"
+            title="Department"
+            value="department"
+          ></v-list-item>
+        </router-link>
         <router-link to="/users" class="text-white">
         <v-list-item
           prepend-icon="mdi-account-group"
