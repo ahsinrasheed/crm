@@ -7,6 +7,9 @@
       
     </v-toolbar-title>
     <v-spacer></v-spacer>
+    <div class="userImage">
+      <img :src="imageData"  height="50" alt=" User">
+    </div>
     
     <router-link to="/login" class="text-white">
       <v-btn  v-if="!isLoggedIn" prepend-icon="mdi-login">
@@ -24,15 +27,18 @@ export default {
   name: "Navbar",
   data(){
     return{
+      imageData:'',
     }
   },
 
   computed: {
     isLoggedIn() {
-      return this.$store.state.isLoggedIn; // Assuming isLoggedIn is a state in Vuex store
+      return this.$store.state.isLoggedIn;
     }
   },
-  
+  mounted (){
+    this.imageData = localStorage.getItem("imageUrl")
+  },
   methods:{
     logout(){
       localStorage.removeItem("token");
@@ -44,4 +50,12 @@ export default {
 </script>
 
 <style scoped>
+.userImage{
+  display: flex;
+}
+.userImage img{
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+}
 </style>

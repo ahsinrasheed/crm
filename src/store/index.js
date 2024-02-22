@@ -4,6 +4,8 @@ export default createStore({
   state: {
     drawer: false,
     isLoggedIn: !!localStorage.getItem('token'),
+    type:true,
+    imageData:''
   },
   getters: {
   },
@@ -16,25 +18,26 @@ export default createStore({
     },
     logout(state) {
       state.isLoggedIn = false;
-      localStorage.removeItem('token'); // Clear token from localStorage upon logout
+      localStorage.removeItem('token');
     }
   },
   actions: {
-    async login({ commit }, { username, password }) {
+    async login({ commit }, { userName, password }) {
       try {
-        const response = await fetch('https://dummyjson.com/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await response.json();
-        if (response.ok) {
-          localStorage.setItem('token', data.token); // Store token in localStorage upon successful login
+
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(user => user.userName === userName && user.password === password );
+
+        if (user) {
+
+          localStorage.setItem('token', "thisistoken");
+          localStorage.setItem('loggedIn', JSON.stringify(user));
           commit('login');
+          return Promise.resolve(); 
+
         } else {
-          throw new Error(data.message);
+          throw new Error('Invalid userName or password');
         }
-        
       } catch (error) {
         console.error('Login failed:', error);
         throw error;

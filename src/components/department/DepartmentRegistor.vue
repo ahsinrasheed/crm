@@ -62,7 +62,7 @@ export default {
       companyList: null,
       formData: {
         departmentName: "",
-        companyName: "Select Any Company",
+        companyName: "",
         description: "",
       },
       nameRules: [(v) => !!v || "Department Name is required"],

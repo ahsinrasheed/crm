@@ -16,7 +16,7 @@
         <h2 class="d-flex align-center">Company Registor</h2>
       </v-card-title>
       <v-card-text>
-        <v-form @submit.prevent="submit" class="px-3" ref="form"  v-model="valid">
+        <v-form @submit.prevent="submit" class="px-3" ref="form" >
           <v-text-field
             label="Company Name"
             v-model="formData.name"
@@ -29,24 +29,9 @@
             :rules="employeesRules"
           />
           <v-text-field
-            label="WebsiteUrl"
-            v-model="formData.websiteUrl"
-            :rules="websiteUrlRules"
-          />
-          <v-text-field
-            label="Email"
-            v-model="formData.email"
-            :rules="emailRules"
-          />
-          <v-text-field
-            label="PhoneNumber"
-            v-model="formData.phoneNumber"
-            :rules="phoneNumberRules"
-          />
-          <v-text-field
-            label="Address"
-            v-model="formData.address"
-            :rules="addressRules"
+            label="Description"
+            v-model="formData.description"
+            :rules="descriptionRules"
           />
 
           <v-btn class="bg-red" variant="text" @click="dialog = false"

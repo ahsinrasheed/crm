@@ -24,6 +24,7 @@
             value="dashboard"
           ></v-list-item
         ></router-link>
+
         <router-link to="/company" class="text-white">
           <v-list-item
             prepend-icon="mdi-office-building"
@@ -31,13 +32,15 @@
             value="company"
           ></v-list-item>
         </router-link>
-        <router-link to="/department" class="text-white">
+
+        <router-link v-if="type"  to="/department" class="text-white">
           <v-list-item
             prepend-icon="mdi-domain"
             title="Department"
             value="department"
           ></v-list-item>
         </router-link>
+
         <router-link to="/users" class="text-white">
         <v-list-item
           prepend-icon="mdi-account-group"
@@ -62,6 +65,10 @@ export default {
   },
   computed: {
     drawerValue: () => store.state.drawer,
+    type:()=> {
+     return store.state.type
+
+    }
   },
 };
 </script>

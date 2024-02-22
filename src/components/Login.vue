@@ -4,9 +4,9 @@
       <h1 class="d-flex justify-center">Login</h1>
       <v-form @submit.prevent="login" ref="form">
         <v-text-field
-          v-model="username"
-          :rules="usernameRules"
-          label="Enter Your Username"
+          v-model="userName"
+          :rules="userNameRules"
+          label="Enter Your userName"
           type="text"
           required
         ></v-text-field>
@@ -48,15 +48,16 @@ export default {
 
   data() {
     return {
-      username: "",
+      userName: "",
       password: "",
+      type:true,
       passwordRules: [
-        (value) => !!value || "Name is required",
+        (value) => !!value || "Password is required",
         (value) =>
           (value && value.length >= 8) ||
-          "Password must be less than 20 characters",
+          "Password must be greater than 8 characters",
       ],
-      usernameRules: [
+      userNameRules: [
         (value) => !!value || "username is required",
       ],
       video: null,
@@ -97,20 +98,15 @@ export default {
           this.video.videoWidth,
           this.video.videoHeight
         );
-        // Save the captured image data
         this.imageData = this.canvas.toDataURL("image/png");
+        localStorage.setItem('imageUrl', `${this.imageData}`);
 
-        console.log(this.imageData);
-
-        // Pause the video stream
         this.video.pause();
-
-        // Stop all tracks of the video stream
         let tracks = this.video.srcObject.getTracks();
         tracks.forEach((track) => track.stop());
 
         await this.$store.dispatch("login", {
-          username: this.username,
+          userName: this.userName,
           password: this.password,
         });
 

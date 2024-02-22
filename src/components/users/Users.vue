@@ -1,12 +1,30 @@
 <template>
   <Navbar />
   <Sidebar />
+  <div>
+    <v-snackbar
+      v-model="snackbar"
+      color="success"
+      location="center"
+      rounded="pill"
+      :timeout="4000"
+    >
+      {{ snackbarMessage }}
+      <template v-slot:actions>
+        <v-btn flat color="red" @click="snackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
+  </div>
   <v-container>
     <div class="d-flex flex-row align-center justify-space-between mb-6">
       <div>
-        <v-breadcrumbs
-          :items="['Home', 'Dashboard', 'Users']"
-        ></v-breadcrumbs>
+        <v-breadcrumbs :items="['Home', 'Dashboard', 'Users']"></v-breadcrumbs>
+      </div>
+      <div>
+        <UserRegistor
+          @usersAdded="handleActionType('add')"
+          @add-users="handleaddingFinished"
+        />
       </div>
     </div>
     <v-row class="pa-4" col="12" md="12">
@@ -16,26 +34,32 @@
         :search="search"
         :headers="headers"
         :items-length="totalItems"
+        :server-items-length="totalItems"
         :items="serverItems"
         :loading="loading"
-        item-value="username"
+        item-value="name"
         @update:options="loadItems"
       >
-      <template v-slot:[`item.image`]="{ item }">
-          <img :src="item.image" alt="img"  width="40px" height="40px"/>
-        </template>
         <template v-slot:[`item.action`]="{ item }">
-          <v-icon small @click="deleteItem(item)" class="text-red"
-            >mdi-delete</v-icon
-          >
+          <EditUser
+            :item="item"
+            @userEdit="handleActionType('edit')"
+            @editing-finished="handleEditingFinished"
+          />
+          <v-icon
+            small
+            @click="deleteItem(item)"
+            class="text-red"
+            icon="mdi-delete"
+          ></v-icon>
         </template>
-        <template v-slot:tfoot>
+        <template v-slot:thead>
           <tr>
             <td>
               <v-text-field
-                v-model="username"
+                v-model="userName"
                 hide-details
-                placeholder="Search username..."
+                placeholder="Search name..."
                 class="ma-2"
                 density="compact"
               ></v-text-field>
@@ -50,66 +74,88 @@
 <script>
 import Navbar from "../Navbar.vue";
 import Sidebar from "../Sidebar.vue";
-
+import UserRegistor from "./UserRegistor.vue";
+import EditUser from "./EditUser.vue";
 export default {
   name: "Users",
+
   components: {
     Navbar,
     Sidebar,
+    UserRegistor,
+    EditUser,
   },
 
   data() {
     return {
-      itemsPerPage: 10,
+      snackbar: false,
+      itemsPerPage: 5,
+      snackbarMessage: "",
       headers: [
         {
-          title: "ID",
+          title: "Name",
           align: "start",
           sortable: false,
-          key: "id",
+          key: "name",
         },
-        { title: "UserName", key: "username", align: "start" },
-        { title: "Gander", key: "gender", align: "start" },
-        { title: "Email", key: "email", align: "start" },
-        { title: "Image", key: "image", align: "start" },
-        { title: "Action", key: "action", align: "start" }, 
+        {
+          title: "User Name",
+          key: "userName",
+          align: "start",
+        },
+        {
+          title: "Company Name",
+          key: "companyName",
+          align: "start",
+        },
+        {
+          title: "Department Name",
+          key: "departmentName",
+          align: "start",
+        },
+        { title: "Action", sortable: false, key: "action", align: "start" },
       ],
       serverItems: [],
       loading: true,
       totalItems: 0,
-      username: "",
+      userName: "",
       search: "",
       currentPage: 1,
-
     };
   },
   watch: {
-    username() {
+    userName() {
       this.search = String(Date.now());
     },
   },
   mounted() {
-    this.fetchData();
+    this.loadLocalStorageData();
   },
   methods: {
-    fetchData() {
+    loadLocalStorageData() {
+
+      const localStorageData = JSON.parse(localStorage.getItem("users"));
+
+      const adminUser = localStorageData.filter((user) => user.role ==='1');
       
-      fetch('https://dummyjson.com/users')
-        .then(response => response.json())
-        .then(data => {
-          this.serverItems = data.users;
-          this.totalItems = data.users.length;
-          this.loading = false;
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        });
+      const normalUsers = localStorageData.filter((user) => user.role === '0');
+
+      if (adminUser) {
+        this.serverItems = localStorageData;
+        this.totalItems = localStorageData.length;
+      }
+      else if (normalUsers){
+       console.log("normal user");
+        this.serverItems = normalUsers;
+        this.totalItems = normalUsers.length;
+      } 
+
     },
 
-    loadItems() { 
-      
+    loadItems() {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = Math.min(startIndex + this.itemsPerPage, this.totalItems);
+      const endIndex = startIndex + this.itemsPerPage;
+
       this.loading = true;
 
       setTimeout(() => {
@@ -117,18 +163,45 @@ export default {
         this.serverItems = this.serverItems.slice(startIndex, endIndex);
       }, 500);
     },
-
     deleteItem(item) {
       const index = this.serverItems.findIndex((i) => i.id === item.id);
 
       if (index !== -1) {
         this.serverItems.splice(index, 1);
         this.totalItems--;
-       
+
+        // Remove item from localStorage
+        const localStorageData = JSON.parse(localStorage.getItem("users"));
+
+        if (localStorageData) {
+          const updatedLocalStorageData = localStorageData.filter(
+            (localStorageItem) => localStorageItem.id !== item.id
+          );
+          localStorage.setItem(
+            "users",
+            JSON.stringify(updatedLocalStorageData)
+          );
+        }
       }
 
       // Implement delete logic here
       console.log("Deleting item:", item);
+    },
+    handleEditingFinished() {
+      this.loadLocalStorageData();
+    },
+    handleaddingFinished() {
+      this.loadLocalStorageData();
+    },
+
+    handleActionType(type) {
+      this.actionType = type;
+      if (type === "add") {
+        this.snackbarMessage = "User added successfully";
+      } else if (type === "edit") {
+        this.snackbarMessage = "User edited successfully";
+      }
+      this.snackbar = true;
     },
   },
 };

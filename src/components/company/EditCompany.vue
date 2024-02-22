@@ -11,7 +11,7 @@
         <v-form @submit.prevent="" class="px-3">
           <v-text-field
             label="Company Name"
-            v-model="formData.name"
+            v-model="formData.companyName"
             :rules="nameRules"
           />
           <v-text-field
@@ -21,24 +21,9 @@
             :rules="employeesRules"
           />
           <v-text-field
-            label="WebsiteUrl"
-            v-model="formData.websiteUrl"
-            :rules="websiteUrlRules"
-          />
-          <v-text-field
-            label="Email"
-            v-model="formData.email"
-            :rules="emailRules"
-          />
-          <v-text-field
-            label="PhoneNumber"
-            v-model="formData.phoneNumber"
-            :rules="phoneNumberRules"
-          />
-          <v-text-field
-            label="Address"
-            v-model="formData.address"
-            :rules="addressRules"
+            label="Description"
+            v-model="formData.description"
+            :rules="descriptionRules"
           />
           <div>
             <v-btn class="bg-red" variant="text" @click="dialog = false"
@@ -66,31 +51,16 @@ export default {
       dialog: false,
       loading: false,
       formData: {
-        name: "",
+        companyName: "",
         employees: "",
-        websiteUrl: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
+        description: "",
       },
       nameRules: [(v) => !!v || "Company Name is required"],
       employeesRules: [
         (v) => !!v || "Number of Employees is required",
         (v) => /^[0-9]+$/.test(v) || "Must be a valid number",
       ],
-      websiteUrlRules: [
-        (v) => !!v || "Website URL is required",
-        (v) => /^(ftp|http|https):\/\/[^ "]+$/.test(v) || "Must be a valid URL",
-      ],
-      emailRules: [
-        (v) => !!v || "Email is required",
-        (v) => /.+@.+\..+/.test(v) || "Email must be valid",
-      ],
-      phoneNumberRules: [
-        (v) => !!v || "Phone Number is required",
-        (v) => /^[0-9]+$/.test(v) || "Must be a valid number",
-      ],
-      addressRules: [(v) => !!v || "Address is required"],
+      descriptionRules: [(v) => !!v || "Address is required"],
     };
 
   },
@@ -101,12 +71,9 @@ export default {
   methods: {
     populateFormData(){
         if (this.item) {
-        this.formData.name = this.item.name;
+        this.formData.companyName = this.item.companyName;
         this.formData.employees = this.item.employees;
-        this.formData.websiteUrl = this.item.websiteUrl;
-        this.formData.email = this.item.email;
-        this.formData.phoneNumber = this.item.phoneNumber;
-        this.formData.address = this.item.address;
+        this.formData.description = this.item.description;
       }
 
     },
@@ -118,6 +85,9 @@ export default {
         if (index !== -1) {
             localStorageData[index] = { ...localStorageData[index], ...this.formData };
             localStorage.setItem("companies", JSON.stringify(localStorageData));
+
+            this.$emit('companyEdit')  
+            this.$emit('editing-finished'); 
             this.loading = false;
             this.dialog =  false;
         }
